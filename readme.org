@@ -1,0 +1,119 @@
+* sps-mode
+
+This is an [[http://www.gnu.org/software/emacs/][Emacs]] minor mode and collection of commands for working with
+[[http://common-lisp.net/project/parenscript/][Parenscript]] code in [[http://common-lisp.net/project/slime/][SLIME]] and sending it to the browser via [[https://github.com/skeeto/skewer-mode][Skewer]]. The goal is
+to create an environment for hacking Parenscript which fits as naturally as
+possible into the Lisp style of interactive development.
+
+Note that this is very young code and there are certain to be serious problems.
+
+There's at least one other project with related goals, [[https://github.com/3b/slime-proxy][slime-proxy]], though at
+the time of writing it's unclear whether it's still being actively developed.
+
+** Installation
+
+=sps-mode= has both [[http://en.wikipedia.org/wiki/Common_Lisp][Common Lisp]] and Emacs dependencies.
+
+- Common Lisp dependencies
+  - Your preferred [[http://en.wikipedia.org/wiki/Common_Lisp][Common Lisp]] implementation
+  - [[http://common-lisp.net/project/parenscript/][Parenscript]]
+
+You almost certainly want to use [[http://www.quicklisp.org/beta/][Quicklisp]] to install Parenscript.
+
+- Emacs dependencies
+  - [[http://common-lisp.net/project/slime/][SLIME]]
+  - [[https://github.com/skeeto/skewer-mode][Skewer]]
+  - [[https://github.com/magnars/s.el][s.el]]
+  - [[https://github.com/magnars/dash.el][dash.el]]
+
+My recommendation is to install SLIME via the [[https://github.com/quicklisp/quicklisp-slime-helper][Quicklisp SLIME Helper]] and
+the others through [[http://www.emacswiki.org/emacs/ELPA][ELPA]].
+
+** Setup
+
+To enable sps-mode in a SLIME buffer: =M-x sps-mode=.
+
+To have =lisp-mode=, =slime-mode=, and =sps-mode= all enable automatically for
+any file with an extension of ".paren":
+
+#+BEGIN_SRC emacs-lisp
+(add-to-list 'auto-mode-alist (cons "\\.paren\\'" 'lisp-mode))
+(add-hook 'lisp-mode-hook
+          #'(lambda ()
+              (when (and buffer-file-name
+                         (s-ends-with? ".paren" buffer-file-name))
+                (unless (slime-connected-p)
+                  (save-excursion (slime)))
+                (sps-mode +1))))
+#+END_SRC
+
+=slime-mode= must be active for both expansion and evaluation commands. For
+evaluation commands, =skewer-mode= is also required. (See below for a list of
+the available commands).
+
+Parenscript must be loaded in your Common Lisp image, and you'll probably also
+want to import its symbols:
+
+#+BEGIN_SRC common-lisp
+(ql:quickload :parenscript)
+(use-package :parenscript)
+#+END_SRC
+
+** Commands
+
+*** Code expansion commands
+
+These commands generate JavaScript from the Parenscript code and display it but
+don't send it to the browser for evaluation:
+
+    - =sps-expand-sexp=
+    - =sps-expand-last-expression=
+    - =sps-expand-defun=
+    - =sps-expand-region=
+    - =sps-expand-buffer=
+    - =sps-expand-dwim=
+
+From within an expansion buffer you can press "x" to send the JavaScript to the
+browser.
+
+*** Code evaluation commands
+
+These commands first compile the Parenscript code to JavaScript and then
+immediately send to it the browser to be evaluated:
+
+    - =sps-eval-sexp=
+    - =sps-eval-last-expression=
+    - =sps-eval-defun=
+    - =sps-eval-region=
+    - =sps-eval-buffer=
+    - =sps-eval-dwim=
+
+** Keybindings
+
+Many programming modes, including most Skewer modes, use keybindings which
+overlap with SLIME's. To enable those bindings, thus shadowing SLIME's, you can
+use =(sps-shadow-slime-keybindings!)=.
+
+However /this isn't recommended/. There's a good chance you'll want the
+flexibility to evaluate the code in an =sps-mode= buffer as either Common Lisp
+or Parenscript, in which case you won't want to shadow the SLIME keybindings.
+In this case you should assign key bindings yourself.
+
+** Still do be done
+
+    - Test against a wider array of code. Are there problems with quoting?
+    - Better documentation.
+    - Add a REPL and/or a scratch buffer.
+    - See if more integration with SLIME is possible (e.g. the selector).
+    - Command(s) for compiling with the output going to a file.
+    - Similar support for [[http://weitz.de/cl-who/][CL-WHO]] and/or [[https://github.com/paddymul/css-lite][CSS-LITE]]?
+    - Optional default keybindings that don't shadow SLIME.
+    - Function(s) to add keybindings behind prefix keys (see js2r).
+    - Get to know ELPA and packaging.
+    - Add support for Customize.
+
+** Contributing
+
+Contributions are very welcome. Since I've just started working on this and
+don't have everything figured out yet, please first contact me on GitHub or
+send me an email so we can talk before you start working on something.
