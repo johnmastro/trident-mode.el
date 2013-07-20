@@ -31,7 +31,7 @@ the others through [[http://www.emacswiki.org/emacs/ELPA][ELPA]].
 
 ** Setup
 
-To enable sps-mode in a SLIME buffer: =M-x sps-mode=.
+To enable =sps-mode= in a SLIME buffer: =M-x sps-mode=.
 
 To have =lisp-mode=, =slime-mode=, and =sps-mode= all enable automatically for
 any file with an extension of ".paren":
@@ -88,16 +88,68 @@ immediately send to it the browser to be evaluated:
     - =sps-eval-buffer=
     - =sps-eval-dwim=
 
-** Keybindings
+** Key bindings
 
-Many programming modes, including most Skewer modes, use keybindings which
-overlap with SLIME's. To enable those bindings, thus shadowing SLIME's, you can
-use =(sps-shadow-slime-keybindings!)=.
+The traditional set of code evaluation key bindings is a poor fit for
+=sps-mode=, since they would shadow SLIME's equivalent commands and that's
+probably not what you want. That leaves us without a clear convention to
+follow, so by default we don't establish any key bindings at all. However, the
+function =sps-add-keys-with-prefix= will add two-key key bindings for all
+commands behind a prefix of your choice.
 
-However /this isn't recommended/. There's a good chance you'll want the
-flexibility to evaluate the code in an =sps-mode= buffer as either Common Lisp
-or Parenscript, in which case you won't want to shadow the SLIME keybindings.
-In this case you should assign key bindings yourself.
+For example:
+
+#+BEGIN_SRC emacs-lisp
+(sps-add-keys-with-prefix "C-c C-e")
+;; The key sequence for sps-eval-region is "er", so it's now bound to
+;; "C-c C-e er"
+#+END_SRC
+
+The full list of key bindings =sps-add-keys-with-prefix= will establish is:
+
+    - =e RET= -- =sps-eval-sexp=
+    - =ee= -- =sps-eval-last-expression=
+    - =ed= -- =sps-eval-defun=
+    - =er= -- =sps-eval-region=
+    - =eb= -- =sps-eval-buffer=
+    - =e SPC= -- =sps-eval-dwim=
+    - =x RET= -- =sps-expand-sexp=
+    - =xe= -- =sps-expand-last-expression=
+    - =xd= -- =sps-expand-defun=
+    - =xr= -- =sps-expand-region=
+    - =xb= -- =sps-expand-buffer=
+    - =x SPC= -- =sps-expand-dwim=
+
+Evaluation commands begin with an "e", expansion commands with "x". The second
+letter is generally mnemonic but not always. The =-sexp= commands use =RET= in
+correspondence to =slime-expand-1=, and the =-dwim= commands use the space bar
+because it's easy and comfortable to hit.
+
+Please consider these keys provisional, and let me know if you have any ideas
+for improving the arrangement.
+
+If you really want to shadow SLIME's key bindings in buffers where =sps-mode= is
+active you could do something like this:
+
+#+BEGIN_SRC emacs-lisp
+(defun steal-slime-keys-for-sps! ()
+  ;; Don't affect all SLIME buffers, just where invoked
+  (make-local-variable 'slime-mode-map)
+  (let ((map slime-mode-map))
+    (define-key map (kbd "C-x C-e") nil)
+    (define-key map (kbd "C-c C-r") nil)
+    (define-key map (kbd "C-M-x")   nil)
+    (define-key map (kbd "C-c C-k") nil)
+    (define-key map (kbd "C-c C-m") nil))
+  (let ((map sps-mode-map))
+    (define-key map (kbd "C-x C-e") 'sps-eval-last-expression)
+    (define-key map (kbd "C-c C-r") 'sps-eval-region)
+    (define-key map (kbd "C-M-x")   'sps-eval-defun)
+    (define-key map (kbd "C-c C-k") 'sps-eval-buffer)
+    (define-key map (kbd "C-c C-m") 'sps-expand-sexp)))
+
+(add-hook 'sps-mode-hook 'steal-slime-keys-for-sps!)
+#+END_SRC
 
 ** Still do be done
 
@@ -107,8 +159,6 @@ In this case you should assign key bindings yourself.
     - See if more integration with SLIME is possible (e.g. the selector).
     - Command(s) for compiling with the output going to a file.
     - Similar support for [[http://weitz.de/cl-who/][CL-WHO]] and/or [[https://github.com/paddymul/css-lite][CSS-LITE]]?
-    - Optional default keybindings that don't shadow SLIME.
-    - Function(s) to add keybindings behind prefix keys (see js2r).
     - Get to know ELPA and packaging.
     - Add support for Customize.
 

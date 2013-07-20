@@ -194,30 +194,27 @@ If the region is active this is equivalent to invoking
 
 ;;;; Keybindings
 
-(defun sps-shadow-slime-keybindings! ()
-  "Rebind SLIME's evaluation keys for Parenscript.
+(defun sps-prefix-keys (prefix keys)
+  "Prepend PREFIX to KEYS and read with `read-kbd-macro`."
+  (read-kbd-macro (concat prefix " " keys)))
 
-This uses the same keys that `slime-mode` uses, thus shadowing
-them. If you want to use both sets of evaluation commands in the
-same buffer you will likely want to define other keys manually.
-
-This command must be run in the buffer that the keybindings are
-to be used in - it relies on `make-local-variable` to avoid
-changing SLIME's bindings in other buffers."
-  (interactive)
-  (make-local-variable 'slime-mode-map)
-  (let ((map slime-mode-map))
-    (define-key map (kbd "C-x C-e") nil)
-    (define-key map (kbd "C-c C-r") nil)
-    (define-key map (kbd "C-M-x")   nil)
-    (define-key map (kbd "C-c C-k") nil)
-    (define-key map (kbd "C-c RET") nil))
+(defun sps-add-keys-with-prefix (p)
+  "Add keybindings for `sps-mode` commands behind prefix P."
   (let ((map sps-mode-map))
-    (define-key map (kbd "C-x C-e") 'sps-eval-last-expression)
-    (define-key map (kbd "C-c C-r") 'sps-eval-region)
-    (define-key map (kbd "C-M-x")   'sps-eval-defun)
-    (define-key map (kbd "C-c C-k") 'sps-eval-buffer)
-    (define-key map (kbd "C-c RET") 'sps-expand-sexp)))
+    ;; Evaluation commands
+    (define-key map (sps-prefix-keys p "e C-m") 'sps-eval-sexp)
+    (define-key map (sps-prefix-keys p "ee")    'sps-eval-last-expression)
+    (define-key map (sps-prefix-keys p "ed")    'sps-eval-defun)
+    (define-key map (sps-prefix-keys p "er")    'sps-eval-region)
+    (define-key map (sps-prefix-keys p "eb")    'sps-eval-buffer)
+    (define-key map (sps-prefix-keys p "e SPC") 'sps-eval-dwim)
+    ;; Expansion commands
+    (define-key map (sps-prefix-keys p "x C-m") 'sps-expand-sexp)
+    (define-key map (sps-prefix-keys p "xe")    'sps-expand-last-expression)
+    (define-key map (sps-prefix-keys p "xd")    'sps-expand-defun)
+    (define-key map (sps-prefix-keys p "xr")    'sps-expand-region)
+    (define-key map (sps-prefix-keys p "xb")    'sps-expand-buffer)
+    (define-key map (sps-prefix-keys p "x SPC") 'sps-expand-dwim)))
 
 ;;;; The minor mode
 
