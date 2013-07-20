@@ -30,7 +30,7 @@
 (defvar sps-mode-map (make-sparse-keymap)
   "Keymap for sps-mode.
 This keymap is initialized empty. You can optionally use
-`sps-add-keys-with-prefix` to add bindings for all commands on
+`sps-add-keys-with-prefix' to add bindings for all commands on
 two-key sequences behind a prefix of your choice.")
 
 (defvar sps-expansion-mode-map
@@ -38,7 +38,7 @@ two-key sequences behind a prefix of your choice.")
     (define-key map (kbd "q") 'quit-window)
     (define-key map (kbd "x") 'sps-send-expanded-code)
     map)
-  "Keymap for `sps-expansion-mode` buffers.")
+  "Keymap for `sps-expansion-mode' buffers.")
 
 (defvar sps-scratch-mode-map (make-sparse-keymap)
   "Keymap for the *sps-scratch* buffer.")
@@ -79,8 +79,8 @@ what you're doing."
 
 The resulting JavaScript is displayed in a temporary buffer. The
 buffer's major mode is determined by the variable
-`sps-expansion-major-mode` (`javascript-mode` by default).
-`sps-expansion-mode` is enabled as an additional minor mode."
+`sps-expansion-major-mode' (`javascript-mode' by default).
+`sps-expansion-mode' is enabled as an additional minor mode."
   (slime-eval-async (sps-swank-eval-expr string)
     #'(lambda (result)
         (let ((code (read (cadr result))))
@@ -140,8 +140,8 @@ buffer's major mode is determined by the variable
 (defun sps-expand-dwim ()
   "Display the expansion of the active region or toplevel form.
 If the region is active this is equivalent to invoking
-`sps-expand-region`, otherwise it's equivalent to
-`sps-expand-defun`."
+`sps-expand-region', otherwise it's equivalent to
+`sps-expand-defun'."
   (interactive)
   (if (region-active-p)
       (sps-expand-region (region-beginning) (region-end))
@@ -153,7 +153,7 @@ If the region is active this is equivalent to invoking
   "Compile Parenscript STRING and evaluate it in the browser.
 
 The code is first compiled to JavaScript in the CL image and then
-sent to the browser via `skewer-eval`."
+sent to the browser via `skewer-eval'."
   (slime-eval-async (sps-swank-eval-expr string)
     #'(lambda (result)
         (let ((code (read (cadr result))))
@@ -188,15 +188,15 @@ sent to the browser via `skewer-eval`."
 (defun sps-eval-dwim ()
   "Evaluate the active region or toplevel form.
 If the region is active this is equivalent to invoking
-`sps-eval-region`, otherwise it's equivalent to
-`sps-eval-defun`."
+`sps-eval-region', otherwise it's equivalent to
+`sps-eval-defun'."
   (if (region-active-p)
       (sps-eval-region (region-beginning) (region-end))
     (sps-eval-defun)))
 
 (defun sps-send-expanded-code ()
   "Send the expanded code to the browser.
-For use from `sps-expansion-mode` buffers."
+For use from `sps-expansion-mode' buffers."
   (interactive)
   (skewer-eval
    (buffer-substring-no-properties (point-min) (point-max))
@@ -205,11 +205,11 @@ For use from `sps-expansion-mode` buffers."
 ;;;; Keybindings
 
 (defun sps-prefix-keys (prefix keys)
-  "Prepend PREFIX to KEYS and read with `read-kbd-macro`."
+  "Prepend PREFIX to KEYS and read with `read-kbd-macro'."
   (read-kbd-macro (concat prefix " " keys)))
 
 (defun sps-add-keys-with-prefix (p)
-  "Add keybindings for `sps-mode` commands behind prefix P."
+  "Add keybindings for `sps-mode' commands behind prefix P."
   (let ((map sps-mode-map))
     ;; Evaluation commands
     (define-key map (sps-prefix-keys p "e C-m") 'sps-eval-sexp)
@@ -253,12 +253,12 @@ For use from `sps-expansion-mode` buffers."
 ;;;; A little extra SLIME integration
 
 (defun sps-mode-buffer-p (buffer)
-  "Return t if `sps-mode` is active in BUFFER."
+  "Return t if `sps-mode' is active in BUFFER."
   (with-current-buffer buffer
     (bound-and-true-p sps-mode)))
 
 (defun sps-recently-visited-sps-buffer ()
-  "Return the most recently visited `sps-mode` buffer.
+  "Return the most recently visited `sps-mode' buffer.
 Only considers buffers that are not already visible."
   (or (-first #'(lambda (b) (and (sps-mode-buffer-p b)
                                  (null (get-buffer-window b 'visible))))
@@ -266,8 +266,8 @@ Only considers buffers that are not already visible."
       (error "Can't find unshown buffer in sps-mode")))
 
 (defun sps-add-slime-selector-methods ()
-  "Add methods to `slime-selector` for `sps-mode` buffers.
-Allows access to the most recently visited buffer with `sps-mode`
+  "Add methods to `slime-selector' for `sps-mode' buffers.
+Allows access to the most recently visited buffer with sps-mode
 active via \"p\" and to the *sps-scratch* buffer via \"P\"."
   (interactive)
   (def-slime-selector-method ?p
