@@ -35,8 +35,10 @@ two-key sequences behind a prefix of your choice.")
 
 (defvar sps-expansion-mode-map
   (let ((map (make-sparse-keymap)))
+    (define-key map (kbd "e") 'sps-send-expanded-code)
+    (define-key map (kbd "w") 'sps-kill-ring-save-dwim)
+    (define-key map (kbd "s") 'write-file)
     (define-key map (kbd "q") 'quit-window)
-    (define-key map (kbd "x") 'sps-send-expanded-code)
     map)
   "Keymap for `sps-expansion-mode' buffers.")
 
@@ -58,7 +60,8 @@ what you're doing."
   ;; across it and gives it a try.
   )
 
-;;;; A few utilities
+
+;;;; Code expansion
 
 (defun sps-wrap-in-ps-form (string)
   "Return Parenscript STRING wrapped in a PS:PS form."
@@ -67,12 +70,6 @@ what you're doing."
 (defun sps-swank-eval-expr (string)
   "Return a form appropriate for evaluating STRING via Swank."
   `(swank:eval-and-grab-output ,(sps-wrap-in-ps-form string)))
-
-(defun sps-file-name-base (filename)
-  "Return FILENAME's basename without it's extension."
-  (file-name-sans-extension (file-name-nondirectory filename)))
-
-;;;; Code expansion
 
 (defun sps-expand (string)
   "Display the JavaScript generated from Parenscript STRING.
@@ -96,21 +93,27 @@ buffer's major mode is determined by the variable
             (pop-to-buffer (current-buffer)))))
     (slime-current-package)))
 
-;; (defun sps-compile-buffer-to-file (&optional append)
-;;   (interactive "p")
-;;   (when (and (buffer-modified-p)
-;;              (y-or-n-p "Save buffer? "))
-;;     (save-buffer))
-;;   (let* ((this buffer-file-name)
-;;          (dir (and this (file-name-directory this)))
-;;          (initial (and this (concat (sps-file-name-base this) ".js")))
-;;          (destination (read-file-name "Destination: " dir nil nil initial nil))
-;;          (string (buffer-substring-no-properties (point-min) (point-max))))
-;;     (slime-eval-async (sps-swank-eval-expr string)
-;;       #'(lambda (result)
-;;           (let ((code (read (cadr result))))
-;;             (write-region code nil destination append)))
-;;       (slime-current-package))))
+(defun sps-compile-buffer-to-file ()
+  "Compile the current buffer and write the result.
+Prompts for the destination. If a file already exists at the
+destination it's overwritten."
+  (interactive)
+  (when (and (buffer-modified-p)
+             (y-or-n-p "Save buffer? "))
+    (save-buffer))
+  (let* ((this buffer-file-name)
+         (dir (and this (file-name-directory this)))
+         (initial (and this (concat (file-name-base this) ".js")))
+         (destination (read-file-name "Destination: " dir nil nil initial nil))
+         (string (buffer-substring-no-properties (point-min) (point-max))))
+    (slime-eval-async (sps-swank-eval-expr string)
+      #'(lambda (result)
+          (let ((code (read (cadr result))))
+            (with-temp-buffer
+              (erase-buffer)
+              (insert code)
+              (write-region 1 (point-max) destination))))
+      (slime-current-package))))
 
 (defun sps-expand-sexp ()
   "Display the expansion of the form at point."
@@ -194,6 +197,8 @@ If the region is active this is equivalent to invoking
       (sps-eval-region (region-beginning) (region-end))
     (sps-eval-defun)))
 
+;;;; Expansion buffer commands
+
 (defun sps-send-expanded-code ()
   "Send the expanded code to the browser.
 For use from `sps-expansion-mode' buffers."
@@ -201,6 +206,15 @@ For use from `sps-expansion-mode' buffers."
   (skewer-eval
    (buffer-substring-no-properties (point-min) (point-max))
    #'skewer-post-minibuffer))
+
+(defun sps-kill-ring-save-dwim ()
+  "Save the current buffer's content to the kill ring.
+If the region is active, save it; otherwise save the entire
+buffer."
+  (interactive)
+  (if (region-active-p)
+      (kill-ring-save (region-beginning) (region-end))
+    (kill-ring-save (point-min) (point-max))))
 
 ;;;; Keybindings
 

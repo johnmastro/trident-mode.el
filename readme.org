@@ -73,8 +73,13 @@ don't send it to the browser for evaluation:
     - =sps-expand-buffer=
     - =sps-expand-dwim=
 
-From within an expansion buffer you can press "x" to send the JavaScript to the
-browser.
+From within an expansion buffer you can press =e= to send the JavaScript to the
+browser, =w= to copy it to the kill ring, =s= to save it to a file (you'll be
+prompted for the destination) or =q= to dismiss the buffer. The copy command,
+=w=, acts on the region if it's active or the entire buffer otherwise.
+
+Additionally, you can use =M-x sps-compile-buffer-to-file= to expand the
+current buffer and save the generated code directly to a file.
 
 *** Code evaluation commands
 
