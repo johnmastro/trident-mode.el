@@ -1,4 +1,4 @@
-;;; sps-mode.el  --- Tools for interactive Parenscript development
+;;; sps-mode.el --- Live Parenscript interaction -*- lexical-binding: t -*-
 
 ;; Copyright (C) 2013 John Mastro
 
@@ -60,16 +60,46 @@ what you're doing."
   ;; across it and gives it a try.
   )
 
-
 ;;;; Code expansion
 
 (defun sps-wrap-in-ps-form (string)
   "Return Parenscript STRING wrapped in a PS:PS form."
   (format "(ps:ps %s)" string))
 
-(defun sps-swank-eval-expr (string)
-  "Return a form appropriate for evaluating STRING via Swank."
-  `(swank:eval-and-grab-output ,(sps-wrap-in-ps-form string)))
+(defun sps-call-with-expansion (fn string)
+  "Call FN on the result of expanding Parenscript STRING.
+
+Note that FN will be called asynchronously and its return value
+discarded; it must work through side effects alone.
+
+See also `sps-with-expansion'."
+  (let ((string (sps-wrap-in-ps-form string)))
+    (slime-eval-async `(swank:eval-and-grab-output ,string)
+      #'(lambda (result)
+          (funcall fn (read (cadr result))))
+      (slime-current-package))))
+
+(defmacro sps-with-expansion (name-and-string &rest body)
+  "Expand a Parenscript string and execute BODY.
+
+NAME-AND-STRING should be a two-item list, with the second item
+the string to be expanded and the first item the name to which to
+bind the result of the expansion. Note that BODY will be executed
+asynchronously and its return value discarded; it must work
+through side effects alone.
+
+See also `sps-call-with-expansion'."
+  (let ((name (car name-and-string))
+        (string (cadr name-and-string))
+        (rv (make-symbol "rv")))
+    `(slime-eval-async
+         `(swank:eval-and-grab-output ,(sps-wrap-in-ps-form ,string))
+       #'(lambda (,rv)
+           (let ((,name (read (cadr ,rv))))
+             ,@body))
+       (slime-current-package))))
+
+(put 'sps-with-expansion 'lisp-indent-function 1)
 
 (defun sps-expand (string)
   "Display the JavaScript generated from Parenscript STRING.
@@ -78,20 +108,17 @@ The resulting JavaScript is displayed in a temporary buffer. The
 buffer's major mode is determined by the variable
 `sps-expansion-major-mode' (`javascript-mode' by default).
 `sps-expansion-mode' is enabled as an additional minor mode."
-  (slime-eval-async (sps-swank-eval-expr string)
-    #'(lambda (result)
-        (let ((code (read (cadr result))))
-          (slime-with-popup-buffer ("*Parenscript generated JavaScript*")
-            (setq buffer-read-only nil)
-            (erase-buffer)
-            (insert code)
-            (funcall sps-expansion-major-mode)
-            (sps-expansion-mode 1)
-            (font-lock-fontify-buffer)
-            (goto-char (point-min))
-            (setq buffer-read-only t)
-            (pop-to-buffer (current-buffer)))))
-    (slime-current-package)))
+  (sps-with-expansion (code string)
+    (slime-with-popup-buffer ("*Parenscript generated JavaScript*")
+      (setq buffer-read-only nil)
+      (erase-buffer)
+      (insert code)
+      (funcall sps-expansion-major-mode)
+      (sps-expansion-mode 1)
+      (font-lock-fontify-buffer)
+      (goto-char (point-min))
+      (setq buffer-read-only t)
+      (pop-to-buffer (current-buffer)))))
 
 (defun sps-compile-buffer-to-file ()
   "Compile the current buffer and write the result.
@@ -106,14 +133,11 @@ destination it's overwritten."
          (initial (and this (concat (file-name-base this) ".js")))
          (destination (read-file-name "Destination: " dir nil nil initial nil))
          (string (buffer-substring-no-properties (point-min) (point-max))))
-    (slime-eval-async (sps-swank-eval-expr string)
-      #'(lambda (result)
-          (let ((code (read (cadr result))))
-            (with-temp-buffer
-              (erase-buffer)
-              (insert code)
-              (write-region 1 (point-max) destination))))
-      (slime-current-package))))
+    (sps-with-expansion (code string)
+      (with-temp-buffer
+        (erase-buffer)
+        (insert code)
+        (write-region 1 (point-max) destination)))))
 
 (defun sps-expand-sexp ()
   "Display the expansion of the form at point."
@@ -157,11 +181,8 @@ If the region is active this is equivalent to invoking
 
 The code is first compiled to JavaScript in the CL image and then
 sent to the browser via `skewer-eval'."
-  (slime-eval-async (sps-swank-eval-expr string)
-    #'(lambda (result)
-        (let ((code (read (cadr result))))
-          (skewer-eval code #'skewer-post-minibuffer)))
-    (slime-current-package)))
+  (sps-with-expansion (code string)
+    (skewer-eval code #'skewer-post-minibuffer)))
 
 (defun sps-eval-sexp ()
   "Evaluate the expression at point as Parenscript."
