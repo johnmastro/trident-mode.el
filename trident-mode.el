@@ -1,6 +1,6 @@
 ;;; trident-mode.el --- Live Parenscript interaction -*- lexical-binding: t -*-
 
-;; Copyright (C) 2013 John Mastro
+;; This is free and unencumbered software released into the public domain.
 
 ;; Author: John Mastro <john.b.mastro@gmail.com>
 ;; Version: 0.0.1
