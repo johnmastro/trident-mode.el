@@ -1,4 +1,4 @@
-* sps-mode
+* Trident Mode
 
 This is an [[http://www.gnu.org/software/emacs/][Emacs]] minor mode and collection of commands for working with
 [[http://common-lisp.net/project/parenscript/][Parenscript]] code in [[http://common-lisp.net/project/slime/][SLIME]] and sending it to the browser via [[https://github.com/skeeto/skewer-mode][Skewer]]. The goal is
@@ -12,7 +12,7 @@ the time of writing it's unclear whether it's still being actively developed.
 
 ** Installation
 
-=sps-mode= has both [[http://en.wikipedia.org/wiki/Common_Lisp][Common Lisp]] and Emacs dependencies.
+Trident has both [[http://en.wikipedia.org/wiki/Common_Lisp][Common Lisp]] and Emacs dependencies.
 
 - Common Lisp dependencies
   - Your preferred [[http://en.wikipedia.org/wiki/Common_Lisp][Common Lisp]] implementation
@@ -23,7 +23,6 @@ You almost certainly want to use [[http://www.quicklisp.org/beta/][Quicklisp]] t
 - Emacs dependencies
   - [[http://common-lisp.net/project/slime/][SLIME]]
   - [[https://github.com/skeeto/skewer-mode][Skewer]]
-  - [[https://github.com/magnars/s.el][s.el]]
   - [[https://github.com/magnars/dash.el][dash.el]]
 
 My recommendation is to install SLIME via the [[https://github.com/quicklisp/quicklisp-slime-helper][Quicklisp SLIME Helper]] and
@@ -31,20 +30,20 @@ the others through [[http://www.emacswiki.org/emacs/ELPA][ELPA]].
 
 ** Setup
 
-To enable =sps-mode= in a SLIME buffer: =M-x sps-mode=.
+To enable =trident-mode= in a SLIME buffer: =M-x trident-mode=.
 
-To have =lisp-mode=, =slime-mode=, and =sps-mode= all enable automatically for
-any file with an extension of ".paren":
+To have =lisp-mode=, =slime-mode=, and =trident-mode= all enable automatically
+for any file with an extension of ".paren":
 
 #+BEGIN_SRC emacs-lisp
-(add-to-list 'auto-mode-alist (cons "\\.paren\\'" 'lisp-mode))
-(add-hook 'lisp-mode-hook
-          #'(lambda ()
-              (when (and buffer-file-name
-                         (s-ends-with? ".paren" buffer-file-name))
-                (unless (slime-connected-p)
-                  (save-excursion (slime)))
-                (sps-mode +1))))
+  (add-to-list 'auto-mode-alist (cons "\\.paren\\'" 'lisp-mode))
+  (add-hook 'lisp-mode-hook
+            #'(lambda ()
+                (when (and buffer-file-name
+                           (s-ends-with? ".paren" buffer-file-name))
+                  (unless (slime-connected-p)
+                    (save-excursion (slime)))
+                  (trident-mode +1))))
 #+END_SRC
 
 =slime-mode= must be active for both expansion and evaluation commands. For
@@ -55,8 +54,8 @@ Parenscript must be loaded in your Common Lisp image, and you'll probably also
 want to import its symbols:
 
 #+BEGIN_SRC common-lisp
-(ql:quickload :parenscript)
-(use-package :parenscript)
+  (ql:quickload :parenscript)
+  (use-package :parenscript)
 #+END_SRC
 
 ** Commands
@@ -66,19 +65,19 @@ want to import its symbols:
 These commands generate JavaScript from the Parenscript code and display it but
 don't send it to the browser for evaluation:
 
-    - =sps-expand-sexp=
-    - =sps-expand-last-expression=
-    - =sps-expand-defun=
-    - =sps-expand-region=
-    - =sps-expand-buffer=
-    - =sps-expand-dwim=
+    - =trident-expand-sexp=
+    - =trident-expand-last-expression=
+    - =trident-expand-defun=
+    - =trident-expand-region=
+    - =trident-expand-buffer=
+    - =trident-expand-dwim=
 
 From within an expansion buffer you can press =e= to send the JavaScript to the
 browser, =w= to copy it to the kill ring, =s= to save it to a file (you'll be
 prompted for the destination) or =q= to dismiss the buffer. The copy command,
 =w=, acts on the region if it's active or the entire buffer otherwise.
 
-Additionally, you can use =M-x sps-compile-buffer-to-file= to expand the
+Additionally, you can use =M-x trident-compile-buffer-to-file= to expand the
 current buffer and save the generated code directly to a file.
 
 *** Code evaluation commands
@@ -86,44 +85,44 @@ current buffer and save the generated code directly to a file.
 These commands first compile the Parenscript code to JavaScript and then
 immediately send to it the browser to be evaluated:
 
-    - =sps-eval-sexp=
-    - =sps-eval-last-expression=
-    - =sps-eval-defun=
-    - =sps-eval-region=
-    - =sps-eval-buffer=
-    - =sps-eval-dwim=
+    - =trident-eval-sexp=
+    - =trident-eval-last-expression=
+    - =trident-eval-defun=
+    - =trident-eval-region=
+    - =trident-eval-buffer=
+    - =trident-eval-dwim=
 
 ** Key bindings
 
-The traditional set of code evaluation key bindings is a poor fit for
-=sps-mode=, since they would shadow SLIME's equivalent commands and that's
-probably not what you want. That leaves us without a clear convention to
-follow, so by default we don't establish any key bindings at all. However, the
-function =sps-add-keys-with-prefix= will add two-key key bindings for all
-commands behind a prefix of your choice.
+The traditional set of code evaluation key bindings is a poor fit for Trident,
+since they would shadow SLIME's equivalent commands and that's probably not
+what you want. That leaves us without a clear convention to follow, so by
+default we don't establish any key bindings at all. However, the function
+=trident-add-keys-with-prefix= will add two-key key bindings for all commands
+behind a prefix of your choice.
 
 For example:
 
 #+BEGIN_SRC emacs-lisp
-(sps-add-keys-with-prefix "C-c C-e")
-;; The key sequence for sps-eval-region is "er", so it's now bound to
-;; "C-c C-e er"
+  (trident-add-keys-with-prefix "C-c C-e")
+  ;; The key sequence for trident-eval-region is "e r", so it's now bound to "C-c
+  ;; C-e er"
 #+END_SRC
 
-The full list of key bindings =sps-add-keys-with-prefix= will establish is:
+The full list of key bindings =trident-add-keys-with-prefix= will establish is:
 
-    - =e RET= -- =sps-eval-sexp=
-    - =ee= -- =sps-eval-last-expression=
-    - =ed= -- =sps-eval-defun=
-    - =er= -- =sps-eval-region=
-    - =eb= -- =sps-eval-buffer=
-    - =e SPC= -- =sps-eval-dwim=
-    - =x RET= -- =sps-expand-sexp=
-    - =xe= -- =sps-expand-last-expression=
-    - =xd= -- =sps-expand-defun=
-    - =xr= -- =sps-expand-region=
-    - =xb= -- =sps-expand-buffer=
-    - =x SPC= -- =sps-expand-dwim=
+    - =e RET= -- =trident-eval-sexp=
+    - =e e= -- =trident-eval-last-expression=
+    - =e d= -- =trident-eval-defun=
+    - =e r= -- =trident-eval-region=
+    - =e b= -- =trident-eval-buffer=
+    - =e SPC= -- =trident-eval-dwim=
+    - =x RET= -- =trident-expand-sexp=
+    - =x e= -- =trident-expand-last-expression=
+    - =x d= -- =trident-expand-defun=
+    - =x r= -- =trident-expand-region=
+    - =x b= -- =trident-expand-buffer=
+    - =x SPC= -- =trident-expand-dwim=
 
 Evaluation commands begin with an "e", expansion commands with "x". The second
 letter is generally mnemonic but not always. The =-sexp= commands use =RET= in
@@ -133,39 +132,39 @@ because it's easy and comfortable to hit.
 Please consider these keys provisional, and let me know if you have any ideas
 for improving the arrangement.
 
-If you really want to shadow SLIME's key bindings in buffers where =sps-mode= is
-active you could do something like this:
+If you really want to shadow SLIME's key bindings in buffers where
+=trident-mode= is active you could do something like this:
 
 #+BEGIN_SRC emacs-lisp
-(defun steal-slime-keys-for-sps! ()
-  ;; Don't affect all SLIME buffers, just where invoked
-  (make-local-variable 'slime-mode-map)
-  (let ((map slime-mode-map))
-    (define-key map (kbd "C-x C-e") nil)
-    (define-key map (kbd "C-c C-r") nil)
-    (define-key map (kbd "C-M-x")   nil)
-    (define-key map (kbd "C-c C-k") nil)
-    (define-key map (kbd "C-c C-m") nil))
-  (let ((map sps-mode-map))
-    (define-key map (kbd "C-x C-e") 'sps-eval-last-expression)
-    (define-key map (kbd "C-c C-r") 'sps-eval-region)
-    (define-key map (kbd "C-M-x")   'sps-eval-defun)
-    (define-key map (kbd "C-c C-k") 'sps-eval-buffer)
-    (define-key map (kbd "C-c C-m") 'sps-expand-sexp)))
-
-(add-hook 'sps-mode-hook 'steal-slime-keys-for-sps!)
+  (defun steal-slime-keys-for-trident! ()
+    ;; Don't affect all SLIME buffers, just where invoked
+    (make-local-variable 'slime-mode-map)
+    (let ((map slime-mode-map))
+      (define-key map (kbd "C-x C-e") nil)
+      (define-key map (kbd "C-c C-r") nil)
+      (define-key map (kbd "C-M-x")   nil)
+      (define-key map (kbd "C-c C-k") nil)
+      (define-key map (kbd "C-c C-m") nil))
+    (let ((map trident-mode-map))
+      (define-key map (kbd "C-x C-e") 'trident-eval-last-expression)
+      (define-key map (kbd "C-c C-r") 'trident-eval-region)
+      (define-key map (kbd "C-M-x")   'trident-eval-defun)
+      (define-key map (kbd "C-c C-k") 'trident-eval-buffer)
+      (define-key map (kbd "C-c C-m") 'trident-expand-sexp)))
+  
+  (add-hook 'trident-mode-hook 'steal-slime-keys-for-trident!)
 #+END_SRC
 
 ** Other amenities
 
-=slime-selector= is a great feature and =sps-mode= can optionally integrate
-with it. If you call =sps-add-slime-selector-methods=, two entries related to
-=sps-mode= will be added. One, invoked with =p=, will take you to the most
-recently visited buffer where =sps-mode= is active (excluding buffers which are
-already visible). The other, on =P=, will take you to a scratch buffer with
-=sps-mode= enabled, creating the buffer if necessary.
+=slime-selector= is a great feature and Trident can optionally integrate with
+it. If you call =trident-add-slime-selector-methods=, two entries related to
+=trident-mode= will be added. One, invoked with =p=, will take you to the most
+recently visited buffer where =trident-mode= is active (excluding buffers which
+are already visible). The other, on =P=, will take you to a scratch buffer with
+=trident-mode= enabled, creating the buffer if necessary.
 
-Speaking of the scratch buffer, the =sps-scratch= command will take you
+Speaking of the scratch buffer, the =trident-scratch= command will take you
 straight there.
 
 ** Still do be done
