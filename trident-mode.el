@@ -6,7 +6,7 @@
 ;; URL: https://github.com/johnmastro/trident-mode.el
 ;; Version: 0.9.1
 ;; Keywords: languages, lisp, processes, tools
-;; Package-Requires: ((slime "2013-05-26") (skewer-mode "1.5.0") (dash "1.0.3"))
+;; Package-Requires: ((emacs "24") (slime "20130526") (skewer-mode "1.5.0") (dash "1.0.3"))
 
 ;;; Commentary:
 
