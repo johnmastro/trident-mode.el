@@ -22,6 +22,7 @@
 ;;; Code:
 
 (require 'slime)
+(require 'skewer-mode)
 (require 'dash)
 
 ;;;; Vars
