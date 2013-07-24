@@ -40,7 +40,7 @@ for any file with an extension of ".paren":
   (add-hook 'lisp-mode-hook
             #'(lambda ()
                 (when (and buffer-file-name
-                           (s-ends-with? ".paren" buffer-file-name))
+                           (string-match-p "\\.paren\\>" buffer-file-name))
                   (unless (slime-connected-p)
                     (save-excursion (slime)))
                   (trident-mode +1))))
