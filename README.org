@@ -5,8 +5,6 @@ This is an [[http://www.gnu.org/software/emacs/][Emacs]] minor mode and collecti
 to create an environment for hacking Parenscript which fits as naturally as
 possible into the Lisp style of interactive development.
 
-Note that this is very young code and there are certain to be serious problems.
-
 There's at least one other project with related goals, [[https://github.com/3b/slime-proxy][slime-proxy]], though at
 the time of writing it's unclear whether it's still being actively developed.
 
