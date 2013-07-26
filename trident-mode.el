@@ -17,21 +17,24 @@
 
 ;; ** Installation
 
-;; Trident has both Common Lisp and Emacs dependencies.
+;; Trident is available on MELPA, meaning a simple =M-x package-install RET
+;; trident-mode RET= will install both it and its dependencies.
 
-;; - Common Lisp dependencies
-;;   - Your preferred Common Lisp implementation
-;;   - Parenscript
+;; To enable MELPA, if you haven't already, add something like the following to
+;; your Emacs configuration:
 
-;; You almost certainly want to use Quicklisp to install Parenscript.
+;;   (require 'package)
+;;   (add-to-list 'package-archives
+;;                '("melpa" . "http://melpa.milkbox.net/packages/") t)
+;;   (package-initialize)
 
-;; - Emacs dependencies
+;; The dependencies that will be installed are:
 ;;   - SLIME
 ;;   - Skewer
 ;;   - dash.el
 
-;; My recommendation is to install SLIME via the Quicklisp SLIME Helper and the
-;; others, including Trident itself, through Emacs's package.el infrastructure.
+;; Trident also requires a Common Lisp implementation and Parenscript.
+;; Quicklisp is the best way to install Parenscript.
 
 ;; ** Setup
 
@@ -71,12 +74,12 @@
 ;; These commands generate JavaScript from the Parenscript code and display it
 ;; but don't send it to the browser for evaluation:
 
-;;     - trident-expand-sexp
-;;     - trident-expand-last-expression
-;;     - trident-expand-defun
-;;     - trident-expand-region
-;;     - trident-expand-buffer
-;;     - trident-expand-dwim
+;;    - trident-expand-sexp
+;;    - trident-expand-last-expression
+;;    - trident-expand-defun
+;;    - trident-expand-region
+;;    - trident-expand-buffer
+;;    - trident-expand-dwim
 
 ;; From within an expansion buffer you can press e to send the JavaScript to
 ;; the browser, w to copy it to the kill ring, s to save it to a file (you'll
@@ -92,12 +95,12 @@
 ;; These commands first compile the Parenscript code to JavaScript and then
 ;; immediately send to it the browser to be evaluated:
 
-;;     - trident-eval-sexp
-;;     - trident-eval-last-expression
-;;     - trident-eval-defun
-;;     - trident-eval-region
-;;     - trident-eval-buffer
-;;     - trident-eval-dwim
+;;    - trident-eval-sexp
+;;    - trident-eval-last-expression
+;;    - trident-eval-defun
+;;    - trident-eval-region
+;;    - trident-eval-buffer
+;;    - trident-eval-dwim
 
 ;; ** Key bindings
 
@@ -114,18 +117,18 @@
 ;; The full list of key bindings trident-add-keys-with-prefix will establish
 ;; is:
 
-;;     - "e RET" -- trident-eval-sexp
-;;     - "e e" -- trident-eval-last-expression
-;;     - "e d" -- trident-eval-defun
-;;     - "e r" -- trident-eval-region
-;;     - "e b" -- trident-eval-buffer
-;;     - "e SPC" -- trident-eval-dwim
-;;     - "x RET" -- trident-expand-sexp
-;;     - "x e" -- trident-expand-last-expression
-;;     - "x d" -- trident-expand-defun
-;;     - "x r" -- trident-expand-region
-;;     - "x b" -- trident-expand-buffer
-;;     - "x SPC" -- trident-expand-dwim
+;;    - "e RET" -- trident-eval-sexp
+;;    - "e e" -- trident-eval-last-expression
+;;    - "e d" -- trident-eval-defun
+;;    - "e r" -- trident-eval-region
+;;    - "e b" -- trident-eval-buffer
+;;    - "e SPC" -- trident-eval-dwim
+;;    - "x RET" -- trident-expand-sexp
+;;    - "x e" -- trident-expand-last-expression
+;;    - "x d" -- trident-expand-defun
+;;    - "x r" -- trident-expand-region
+;;    - "x b" -- trident-expand-buffer
+;;    - "x SPC" -- trident-expand-dwim
 
 ;; Evaluation commands begin with an "e", expansion commands with "x". The
 ;; second letter is generally mnemonic but not always. The -sexp commands use
@@ -170,14 +173,13 @@
 
 ;; ** Still do be done
 
-;;     - Test against a wider array of code. Are there problems with quoting?
-;;     - Better documentation.
-;;     - Look into adding a REPL.
-;;     - See if more integration with SLIME is possible.
-;;     - Command(s) for compiling to a file.
-;;     - Similar support for CL-WHO and/or CSS-LITE?
-;;     - Get to know ELPA and packaging.
-;;     - Add support for Customize.
+;;    - Add some tests.
+;;    - Better documentation.
+;;    - Look into adding a REPL.
+;;    - See if more integration with SLIME is possible.
+;;    - Command(s) for compiling to a file.
+;;    - Similar support for CL-WHO and/or CSS-LITE?
+;;    - Add support for Customize.
 
 ;; ** Contributing
 
