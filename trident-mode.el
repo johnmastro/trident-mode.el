@@ -372,6 +372,7 @@ sent to the browser via `skewer-eval'."
 If the region is active this is equivalent to invoking
 `trident-eval-region', otherwise it's equivalent to
 `trident-eval-defun'."
+  (interactive)
   (if (region-active-p)
       (trident-eval-region (region-beginning) (region-end))
     (trident-eval-defun)))
