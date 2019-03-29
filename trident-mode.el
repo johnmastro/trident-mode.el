@@ -492,7 +492,6 @@ via \"P\"."
 (provide 'trident-mode)
 
 ;; Local Variables:
-;; lexical-binding: t
 ;; indent-tabs-mode: nil
 ;; coding: utf-8
 ;; End:
