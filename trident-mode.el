@@ -385,10 +385,7 @@ the current buffer."
 (defun trident-eval-buffer ()
   "Evaluate the current buffer as Parenscript."
   (interactive)
-  (prog1
-      (trident-eval-region (point-min) (point-max))
-    (when slime-highlight-edits-mode
-      (slime-remove-edits (point-min) (point-max)))))
+  (trident-eval-region (point-min) (point-max)))
 
 (defun trident-eval-dwim ()
   "Evaluate the active region or toplevel form.
