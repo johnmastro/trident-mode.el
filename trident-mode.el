@@ -347,10 +347,30 @@ sent to the browser via `skewer-eval'."
   (interactive)
   (trident-eval (slime-sexp-at-point)))
 
-(defun trident-eval-last-expression ()
-  "Evaluate the expression preceding point as Parenscript."
+(defun trident-eval-last-expression (&optional prefix)
+  "Evaluate the expression preceding point as Parenscript. If
+invoked with a prefix argument, insert the result into the
+current buffer."
+  (interactive "P")
+  (if prefix
+      (trident-eval-print-last-expression)
+    (trident-eval (slime-last-expression))))
+
+(defun trident-eval-print-last-expression ()
+  "Evaluate sexp before point as Parenscript; print value into
+the current buffer."
   (interactive)
-  (trident-eval (slime-last-expression)))
+  (cl-destructuring-bind (start end)
+      (slime-region-for-defun-at-point)
+    (let ((string (buffer-substring-no-properties start end)))
+      (skewer-flash-region start end)
+      (unless (zerop (current-column))
+        (newline))
+      (trident-with-expansion (code string)
+        (let* ((request (skewer-eval code #'skewer-post-print :verbose t))
+               (id (cdr (assoc 'id request)))
+               (pos (cons (current-buffer) (point))))
+          (setf (cache-table-get id skewer-eval-print-map) pos))))))
 
 (defun trident-eval-defun ()
   "Evaluate the current toplevel form as Parenscript."
